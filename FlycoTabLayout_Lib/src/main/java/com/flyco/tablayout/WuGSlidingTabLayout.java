@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -38,8 +39,7 @@ import java.util.Collections;
 /**
  * 滑动TabLayout,对于ViewPager的依赖性强
  */
-public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.OnPageChangeListener {
-    private String TAG=SlidingTabLayout.class.getName();
+public class WuGSlidingTabLayout extends HorizontalScrollView implements ViewPager.OnPageChangeListener {
     private Context mContext;
     private ViewPager mViewPager;
     private ArrayList<String> mTitles;
@@ -74,6 +74,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
      * indicator
      */
     private int mIndicatorColor;
+    private int[] mIndicatorColors;
     private float mIndicatorHeight;
     private float mIndicatorWidth;
     private float mIndicatorCornerRadius;
@@ -83,6 +84,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
     private float mIndicatorMarginBottom;
     private int mIndicatorGravity;
     private boolean mIndicatorWidthEqualTitle;
+    private int mIndicatorSrc;
 
     /**
      * underline
@@ -114,15 +116,15 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
     private int mHeight;
     private boolean mSnapOnTabClick;
 
-    public SlidingTabLayout(Context context) {
+    public WuGSlidingTabLayout(Context context) {
         this(context, null, 0);
     }
 
-    public SlidingTabLayout(Context context, AttributeSet attrs) {
+    public WuGSlidingTabLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public SlidingTabLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public WuGSlidingTabLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setFillViewport(true);//设置滚动视图是否可以伸缩其内容以填充视口
         setWillNotDraw(false);//重写onDraw方法,需要调用这个方法来清除flag
@@ -163,6 +165,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         mIndicatorMarginBottom = ta.getDimension(R.styleable.SlidingTabLayout_tl_indicator_margin_bottom, dp2px(mIndicatorStyle == STYLE_BLOCK ? 7 : 0));
         mIndicatorGravity = ta.getInt(R.styleable.SlidingTabLayout_tl_indicator_gravity, Gravity.BOTTOM);
         mIndicatorWidthEqualTitle = ta.getBoolean(R.styleable.SlidingTabLayout_tl_indicator_width_equal_title, false);
+        mIndicatorSrc = ta.getResourceId(R.styleable.SlidingTabLayout_tl_indicator_src, 0);
 
         mUnderlineColor = ta.getColor(R.styleable.SlidingTabLayout_tl_underline_color, Color.parseColor("#ffffff"));
         mUnderlineHeight = ta.getDimension(R.styleable.SlidingTabLayout_tl_underline_height, dp2px(0));
@@ -250,11 +253,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
      */
     public void notifyDataSetChanged() {
         mTabsContainer.removeAllViews();
-        if (mViewPager != null) {
-            this.mTabCount = mTitles == null ? mViewPager.getAdapter().getCount() : mTitles.size();
-        } else {
-            this.mTabCount = mTitles == null ? 0 : mTitles.size();
-        }
+        this.mTabCount = mTitles == null ? mViewPager.getAdapter().getCount() : mTitles.size();
         View tabView;
         for (int i = 0; i < mTabCount; i++) {
             tabView = View.inflate(mContext, R.layout.layout_tab, null);
@@ -266,21 +265,23 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
     }
 
     public void addNewTab(String title) {
-        Log.d(TAG,"addNewTab ="+title);
         View tabView = View.inflate(mContext, R.layout.layout_tab, null);
-        this.mTabCount = mTitles == null ? 0 : mTitles.size();
         if (mTitles != null) {
+            this.mTabCount = mTitles == null ? 0 : mTitles.size();
             mTitles.add(title);
         }else {
-            mTitles=new ArrayList<>();
+            mTitles = new ArrayList<>();
+            this.mTabCount = mTitles == null ? 0 : mTitles.size();
             mTitles.add(title);
         }
         if (mViewPager != null) {
+            this.mTabCount = mTitles == null ? mViewPager.getAdapter().getCount() : mTitles.size();
             CharSequence pageTitle = mTitles == null ? mViewPager.getAdapter().getPageTitle(mTabCount) : mTitles.get(mTabCount);
             addTab(mTabCount, pageTitle.toString(), tabView);
-            this.mTabCount = mTitles == null ? mViewPager.getAdapter().getCount() : mTitles.size();
         } else {
+
             addTab(mTabCount, title, tabView);
+
         }
 
 
@@ -291,7 +292,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
      * 创建并添加tab
      */
     private void addTab(final int position, String title, View tabView) {
-        Log.d(TAG,"position ="+position+" title ="+title+" tabView ="+tabView);
+        Log.d("TABLAYOUT","position ="+position);
         TextView tv_tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
         if (tv_tab_title != null) {
             if (title != null) tv_tab_title.setText(title);
@@ -300,6 +301,7 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         tabView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("TABLAYOUT","v ="+v);
                 int position = mTabsContainer.indexOfChild(v);
                 if (position != -1) {
                     if (mViewPager != null) {
@@ -411,16 +413,16 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
             View tabView = mTabsContainer.getChildAt(i);
             final boolean isSelect = i == position;
             TextView tab_title = (TextView) tabView.findViewById(R.id.tv_tab_title);
-
             if (tab_title != null) {
                 tab_title.setTextColor(isSelect ? mTextSelectColor : mTextUnselectColor);
+                tab_title.setTextSize(TypedValue.COMPLEX_UNIT_PX, isSelect ? sp2px(16) : mTextsize);
                 if (mTextBold == TEXT_BOLD_WHEN_SELECT) {
                     tab_title.getPaint().setFakeBoldText(isSelect);
-                }
-                if (isSelect) {
-                    tab_title.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));//加粗
-                } else {
-                    tab_title.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));//常规
+                    if (isSelect) {
+                        tab_title.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));//加粗
+                    } else {
+                        tab_title.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));//加粗
+                    }
                 }
             }
         }
@@ -432,6 +434,10 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         View currentTabView = mTabsContainer.getChildAt(this.mCurrentTab);
         float left = currentTabView.getLeft();
         float right = currentTabView.getRight();
+        if (0 == currentTabView.getWidth()) {
+            invalidate();
+            return;
+        }
 
         //for mIndicatorWidthEqualTitle
         if (mIndicatorStyle == STYLE_NORMAL && mIndicatorWidthEqualTitle) {
@@ -554,7 +560,13 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
                         mIndicatorRect.right + getPaddingLeft(), getHeight(), mRectPaint);*/
 
             if (mIndicatorHeight > 0) {
-                mIndicatorDrawable.setColor(mIndicatorColor);
+                if (mGradual) {
+                    mIndicatorDrawable.setOrientation(GradientDrawable.Orientation.BL_TR);
+                    mIndicatorDrawable.setColors(mIndicatorColors);
+                    mIndicatorDrawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+                } else {
+                    mIndicatorDrawable.setColor(mIndicatorColor);
+                }
 
                 if (mIndicatorGravity == Gravity.BOTTOM) {
                     mIndicatorDrawable.setBounds(paddingLeft + (int) mIndicatorMarginLeft + mIndicatorRect.left,
@@ -567,8 +579,18 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
                             paddingLeft + mIndicatorRect.right - (int) mIndicatorMarginRight,
                             (int) mIndicatorHeight + (int) mIndicatorMarginTop);
                 }
-                mIndicatorDrawable.setCornerRadius(mIndicatorCornerRadius);
-                mIndicatorDrawable.draw(canvas);
+                if (mIndicatorSrc != 0) {//设置了指示器为图片
+                    BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(mIndicatorSrc);
+                    mIndicatorHeight = drawable.getBitmap().getHeight();
+                    drawable.setBounds(paddingLeft + (int) mIndicatorMarginLeft + mIndicatorRect.left,
+                            height - (int) mIndicatorHeight - (int) mIndicatorMarginBottom + (int) mIndicatorMarginTop,
+                            paddingLeft + mIndicatorRect.right - (int) mIndicatorMarginRight,
+                            height - (int) mIndicatorMarginBottom + (int) mIndicatorMarginTop);
+                    drawable.draw(canvas);
+                } else {
+                    mIndicatorDrawable.setCornerRadius(mIndicatorCornerRadius);
+                    mIndicatorDrawable.draw(canvas);
+                }
             }
         }
     }
@@ -576,11 +598,9 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
     //setter and getter
     public void setCurrentTab(int currentTab) {
         this.mCurrentTab = currentTab;
-
         if (mViewPager != null) {
             mViewPager.setCurrentItem(currentTab);
         }
-
         updateTabSelection(currentTab);
     }
 
@@ -609,8 +629,17 @@ public class SlidingTabLayout extends HorizontalScrollView implements ViewPager.
         updateTabStyles();
     }
 
+    private boolean mGradual = false;
+
     public void setIndicatorColor(int indicatorColor) {
         this.mIndicatorColor = indicatorColor;
+        mGradual = false;
+        invalidate();
+    }
+
+    public void setIndicatorColors(int[] indicatorColors) {
+        this.mIndicatorColors = indicatorColors;
+        mGradual = true;
         invalidate();
     }
 

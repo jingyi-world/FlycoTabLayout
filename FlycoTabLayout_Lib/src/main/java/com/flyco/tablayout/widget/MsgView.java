@@ -2,7 +2,9 @@ package com.flyco.tablayout.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
@@ -59,6 +61,17 @@ public class MsgView extends TextView {
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+
+//    Paint.FontMetricsInt fontMetricsInt;
+//    @Override
+//    protected void onDraw(Canvas canvas) {
+//        if (fontMetricsInt == null){
+//            fontMetricsInt = new Paint.FontMetricsInt();
+//            getPaint().getFontMetricsInt(fontMetricsInt);
+//        }
+//        canvas.translate(0, fontMetricsInt.top - fontMetricsInt.ascent);
+//        super.onDraw(canvas);
+//    }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -137,7 +150,9 @@ public class MsgView extends TextView {
 
     private void setDrawable(GradientDrawable gd, int color, int strokeColor) {
         gd.setColor(color);
+//        float[] floats = new float[]{15F, 15F, 15F, 15F, 15F, 15F, 2F, 2F};
         gd.setCornerRadius(cornerRadius);
+//        gd.setCornerRadii(floats);
         gd.setStroke(strokeWidth, strokeColor);
     }
 

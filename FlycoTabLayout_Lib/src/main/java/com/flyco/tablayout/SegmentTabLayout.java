@@ -4,14 +4,23 @@ import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.View;
@@ -21,9 +30,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-
 import com.flyco.tablayout.listener.OnTabSelectListener;
 import com.flyco.tablayout.utils.FragmentChangeManager;
 import com.flyco.tablayout.utils.UnreadMsgUtils;
@@ -32,6 +38,7 @@ import com.flyco.tablayout.widget.MsgView;
 import java.util.ArrayList;
 
 public class SegmentTabLayout extends FrameLayout implements ValueAnimator.AnimatorUpdateListener {
+    private String TAG =SegmentTabLayout.class.getName();
     private Context mContext;
     private String[] mTitles;
     private LinearLayout mTabsContainer;
@@ -81,7 +88,7 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
     private float mBarStrokeWidth;
 
     private int mHeight;
-
+    private Drawable mThumbDrawable;
     /** anim */
     private ValueAnimator mValueAnimator;
     private OvershootInterpolator mInterpolator = new OvershootInterpolator(0.8f);
@@ -157,6 +164,7 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
         mBarColor = ta.getColor(R.styleable.SegmentTabLayout_tl_bar_color, Color.TRANSPARENT);
         mBarStrokeColor = ta.getColor(R.styleable.SegmentTabLayout_tl_bar_stroke_color, mIndicatorColor);
         mBarStrokeWidth = ta.getDimension(R.styleable.SegmentTabLayout_tl_bar_stroke_width, dp2px(1));
+        mThumbDrawable = ta.getDrawable(R.styleable.SegmentTabLayout_tl_thumb_drawable);
 
         ta.recycle();
     }
@@ -167,7 +175,7 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
         }
 
         this.mTitles = titles;
-
+//        Log.d(TAG,"setTabData ="+titles);
         notifyDataSetChanged();
     }
 
@@ -186,6 +194,7 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
             tabView = View.inflate(mContext, R.layout.layout_tab_segment, null);
             tabView.setTag(i);
             addTab(i, tabView);
+//            Log.d(TAG,"notifyDataSetChanged ="+i);
         }
 
         updateTabStyles();
@@ -372,7 +381,7 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
         mRectDrawable.draw(canvas);
 
         // draw divider
-        if (!mIndicatorAnimEnable && mDividerWidth > 0) {
+        if ( mDividerWidth > 0) {
             mDividerPaint.setStrokeWidth(mDividerWidth);
             mDividerPaint.setColor(mDividerColor);
             for (int i = 0; i < mTabCount - 1; i++) {
@@ -399,6 +408,25 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
         mIndicatorDrawable.setCornerRadii(mRadiusArr);
         mIndicatorDrawable.draw(canvas);
 
+        Drawable drawable = mThumbDrawable;
+        int w = drawable.getIntrinsicWidth();
+        int h = drawable.getIntrinsicHeight();
+        // 取 drawable 的颜色格式
+        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                : Bitmap.Config.RGB_565;
+        // 建立对应 bitmap
+        Bitmap bitmap = Bitmap.createBitmap(w, h, config);
+        // 把 drawable 内容画到画布中
+//        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+//        roundedBitmapDrawable.setBounds(paddingLeft + (int) mIndicatorMarginLeft + mIndicatorRect.left,
+//                (int) mIndicatorMarginTop, (int) (paddingLeft + mIndicatorRect.right - mIndicatorMarginRight),
+//                (int) (mIndicatorMarginTop + mIndicatorHeight));
+//        roundedBitmapDrawable.setCornerRadius(mIndicatorCornerRadius);
+//        roundedBitmapDrawable.draw(canvas);
+        drawable.setBounds(mIndicatorRect.left,
+                0,  mIndicatorRect.right,
+                (int) mHeight);
+        drawable.draw(canvas);
     }
 
     //setter and getter
@@ -414,6 +442,21 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
         } else {
             invalidate();
         }
+
+    }
+    public void setTabSelectWithEvent(int position) {
+//        Log.d(TAG,"position ="+position+" mCurrentTab ="+mCurrentTab+" mListener ="+mListener);
+        if (mCurrentTab != position) {
+            setCurrentTab(position);
+            if (mListener != null) {
+                mListener.onTabSelect(position);
+            }
+        } else {
+            if (mListener != null) {
+                mListener.onTabSelect(position);
+            }
+        }
+
     }
 
     public void setTabPadding(float tabPadding) {
@@ -506,7 +549,10 @@ public class SegmentTabLayout extends FrameLayout implements ValueAnimator.Anima
         this.mTextAllCaps = textAllCaps;
         updateTabStyles();
     }
-
+    public void setThumbDrawable(Drawable drawable){
+        mThumbDrawable = drawable;
+        invalidate();
+    }
     public int getTabCount() {
         return mTabCount;
     }

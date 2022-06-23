@@ -33,7 +33,7 @@
     <attr name="tl_indicator_anim_duration" format="integer"/>
     <!-- 设置显示器支持动画回弹效果-->
     <attr name="tl_indicator_bounce_enable" format="boolean"/>
-
+    <attr name="tl_indicator_src" format="reference" />
     <!-- underline -->
     <!-- 设置下划线颜色 -->
     <attr name="tl_underline_color" format="color"/>
@@ -74,6 +74,7 @@
         <enum name="SELECT" value="1"/>
         <enum name="BOTH" value="2"/>
     </attr>
+
     <!-- 设置字体全大写 -->
     <attr name="tl_textAllCaps" format="boolean"/>
 
@@ -90,6 +91,7 @@
         <attr name="tl_indicator_gravity"/>
         <attr name="tl_indicator_style"/>
         <attr name="tl_indicator_width_equal_title"/>
+        <attr name="tl_indicator_src"/>
 
         <!-- underline -->
         <attr name="tl_underline_color"/>
@@ -156,8 +158,12 @@
         <!-- icon -->
         <!-- 设置icon宽度 -->
         <attr name="tl_iconWidth" format="dimension"/>
+        <!--特殊按钮的宽度-->
+        <attr name="tl_specialIconWidth" format="dimension"/>
         <!-- 设置icon高度 -->
         <attr name="tl_iconHeight" format="dimension"/>
+        <!--特殊按钮的高度-->
+        <attr name="tl_specialIconHeight" format="dimension"/>
         <!-- 设置icon是否可见 -->
         <attr name="tl_iconVisible" format="boolean"/>
         <!-- 设置icon显示位置,对应Gravity中常量值 -->
@@ -201,7 +207,7 @@
         <attr name="tl_textUnselectColor"/>
         <attr name="tl_textBold"/>
         <attr name="tl_textAllCaps"/>
-
+        <attr name="tl_thumb_drawable" format="reference"/>
         <attr name="tl_bar_color" format="color"/>
         <attr name="tl_bar_stroke_color" format="color"/>
         <attr name="tl_bar_stroke_width" format="dimension"/>

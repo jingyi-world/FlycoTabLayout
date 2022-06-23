@@ -35,7 +35,7 @@
         android:layout_toRightOf="@+id/ll_tap"
         android:gravity="center"
         android:textColor="#ffffff"
-        android:textSize="11.5sp"
+        android:textSize="8sp"
         android:visibility="gone"
         mv:mv_backgroundColor="#FD481F"
         mv:mv_isRadiusHalfHeight="true"
