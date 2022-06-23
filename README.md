@@ -97,6 +97,7 @@ dependencies{
 | tl_indicator_anim_duration |integer| set indicator animation duration(only for CommonTabLayout)
 | tl_indicator_bounce_enable |boolean| set indicator aniamtion with bounce effect(only for CommonTabLayout)
 | tl_indicator_width_equal_title |boolean| set indicator width same as text(only for SlidingTabLayout)
+| tl_thumb_drawable |drawable| 滑块为图片only for SegmentTabLayout)
 
 ## Dependence
 *   [NineOldAndroids](https://github.com/JakeWharton/NineOldAndroids)
